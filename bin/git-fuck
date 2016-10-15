@@ -1,42 +1,72 @@
 #!/usr/bin/env node
 
 var SimpleGit = require('simple-git');
-var exec = require('child_process').exec;
-var path = require('path');
-var correctBranch = process.argv[1];
+var path = process.cwd();
+var correctBranch = process.argv[2];
 var repository = SimpleGit(path);
 
-repository.log(function(err, log) {
-  if (error && error !== null) {
-    console.log("Some Error Happend: " + err);
-  } else {
+var empty = function() {};
+
+function handleError(success, error) {
+  success = success || empty;
+  error = error || empty;
+  return function(err, data) {
+    if (err && err !== null) {
+      error(err);
+    } else {
+      success(data);
+    }
+  };
+}
+
+function getLastCommitMessage(callback) {
+  repository.log(handleError(function(log) {
     var lastCommit = log.all[0];
+    var commitToReset = log.all[1];
     if (lastCommit) {
-      var message = lastCommit.message;
-      console.log("Resetting the previous branch.");
-      repository.reset("soft", function(err) {
-        if (err && err !== null) {
-          console.log("Some Error Happend: " + err);
-        } else {
-          console.log("Switching to correct branch.");
-          repository.checkout(correctBranch, function(err) {
-            if (err && err !== null) {
-              console.log("Some Error Happend: " + err);
-            } else {
-              console.log("Commiting to correct branch.");
-              repository.commit(message, function() {
-                if (err && err !== null) {
-                  console.log("Some Error Happend: " + err);
-                } else {
-                  console.log("Done. Your changes should now be in the correct branch.");
-                }
-              });
-            }
-          });
-        }
-      });
+      callback(lastCommit.message, commitToReset.hash);
     } else {
       console.log("git-fuck aborted. No Commit to reset.");
     }
-  }
-});
+  }));
+}
+
+function doSoftResetOfRepo(hash, callback) {
+  console.log("Setting back the last commit.");
+  repository.reset(["--soft", hash], handleError(function() {
+    callback();
+  }));
+}
+
+function checkoutCorrectBranch(branch, callback) {
+  console.log("Switching to correct branch: " + branch);
+  repository.checkout(branch, handleError(function () {
+    callback();
+  }, function() {
+    console.log("Creating a new branch for your changes.");
+    checkoutLocalBranch(branch, function() {
+      callback();
+    });
+  }));
+}
+
+function commitLatestChanges(message, callback) {
+  console.log("Commiting to correct branch.");
+  repository.commit(message, handleError(function() {
+    callback();
+  }));
+}
+
+function fuck(branch) {
+  getLastCommitMessage(function(message, hash) {
+    doSoftResetOfRepo(hash, function() {
+      checkoutCorrectBranch(branch, function() {
+        commitLatestChanges(message, function() {
+          console.log("Done. Your changes should now be in the correct branch.");
+        });
+      });
+    });
+  });
+}
+
+fuck(correctBranch);
