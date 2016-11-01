@@ -16,3 +16,11 @@ Whenever you've pushed something to the wrong branch simply type:
 ```Bash
 git-fuck <correct-branch-name>
 ```
+
+## Recommendation
+
+For better usability use it with this alias:
+
+```Bash
+git config --global alias.fuck git-fuck
+```
