@@ -44,7 +44,7 @@ function checkoutCorrectBranch(branch, callback) {
     callback();
   }, function() {
     console.log("Creating a new branch for your changes.");
-    checkoutLocalBranch(branch, function() {
+    repository.checkoutLocalBranch(branch, function() {
       callback();
     });
   }));
