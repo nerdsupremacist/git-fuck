@@ -24,3 +24,10 @@ For better usability use it with this alias:
 ```Bash
 git config --global alias.fuck git-fuck
 ```
+
+Now you can use it with the command:
+
+
+```Bash
+git fuck <correct-branch-name>
+```
