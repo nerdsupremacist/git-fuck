@@ -2,6 +2,8 @@
 
 var SimpleGit = require('simple-git');
 var path = process.cwd();
+var fs = require('fs');
+
 var correctBranch = process.argv[2];
 var repository = SimpleGit(path);
 
@@ -69,4 +71,38 @@ function fuck(branch) {
   });
 }
 
-fuck(correctBranch);
+function push(branch) {
+    repository.push('origin', branch, handleError(function() {
+        console.log("Succesfully pushed to origin");
+    }));
+}
+
+function forcePush(branch) {
+    repository.push('origin', branch, "--force", handleError(function() {
+        console.log("Succesfully force-pushed to origin");
+    }));
+}
+
+var program = require('commander');
+
+var version = '0.0.7';
+
+program
+    .version(version)
+    .arguments('<branch>')
+    .option('-p, --push', 'Push to Origin')
+    .option('-f, --force', 'Force Push to Origin')
+    .action(function(correctBranch, env) {
+        if (correctBranch) {
+            fuck(correctBranch);
+            if (program.force) {
+                forcePush(correctBranch);
+            } else if (program.push) {
+                push(correctBranch);
+            }
+        } else {
+            console.log("Please specify a branch.");
+        }
+    });
+
+program.parse(process.argv);
