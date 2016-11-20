@@ -85,12 +85,12 @@ function forcePush(branch) {
 
 var program = require('commander');
 
-var version = '0.0.8';
+var version = '0.0.9';
 
 program
     .version(version)
     .arguments('<branch>')
-    .option('-n, --number', 'Number of commits you want to roll back. (Default 1) Note: it will commit everything in a single commit with the last one\'s message.')
+    .option('-n, --number <n>', 'Number of commits you want to roll back. (Default 1) Note: it will commit everything in a single commit with the last one\'s message.')
     .option('-p, --push', 'Push to Origin')
     .option('-f, --force', 'Force Push to Origin')
     .action(function(correctBranch, env) {
