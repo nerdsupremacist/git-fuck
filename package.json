@@ -1,6 +1,6 @@
 {
   "name": "git-fuck",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "For when you commit to the wrong branch",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

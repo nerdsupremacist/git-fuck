@@ -21,10 +21,10 @@ function handleError(success, error) {
   };
 }
 
-function getLastCommitMessage(callback) {
+function getLastCommitMessage(number, callback) {
   repository.log(handleError(function(log) {
     var lastCommit = log.all[0];
-    var commitToReset = log.all[1];
+    var commitToReset = log.all[number];
     if (lastCommit) {
       callback(lastCommit.message, commitToReset.hash);
     } else {
@@ -59,8 +59,8 @@ function commitLatestChanges(message, callback) {
   }));
 }
 
-function fuck(branch) {
-  getLastCommitMessage(function(message, hash) {
+function fuck(branch, number) {
+  getLastCommitMessage(number || 1, function(message, hash) {
     doSoftResetOfRepo(hash, function() {
       checkoutCorrectBranch(branch, function() {
         commitLatestChanges(message, function() {
@@ -85,16 +85,17 @@ function forcePush(branch) {
 
 var program = require('commander');
 
-var version = '0.0.7';
+var version = '0.0.8';
 
 program
     .version(version)
     .arguments('<branch>')
+    .option('-n, --number', 'Number of commits you want to roll back. (Default 1) Note: it will commit everything in a single commit with the last one\'s message.')
     .option('-p, --push', 'Push to Origin')
     .option('-f, --force', 'Force Push to Origin')
     .action(function(correctBranch, env) {
         if (correctBranch) {
-            fuck(correctBranch);
+            fuck(correctBranch, program.number);
             if (program.force) {
                 forcePush(correctBranch);
             } else if (program.push) {
